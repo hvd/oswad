@@ -13,13 +13,18 @@ import com.oswad.init.WordMap;
  *
  */
 public class Classifier implements Runnable
-{
+{	
+
     private String spamCorpusPath;
     private String nonSpamCorpusPath;
 	private WordMap spamMap;
-    private WordMap nonSpamMap;
+
+
+	private WordMap nonSpamMap;
     private Map<String,Integer> documentCountMap = new HashMap<String,Integer>();
     private Map<String,Double> spamProbability;
+    private final String good = "Good";
+    private final String spam = "Spam";
     
 	private Thread classifierThread;
     boolean start = false;
@@ -40,8 +45,8 @@ public class Classifier implements Runnable
 		spamMap = train(spamCorpusPath);		
 		nonSpamMap = train(nonSpamCorpusPath);
 
-		documentCountMap.put("Good", nonSpamMap.getFileCount());
-		documentCountMap.put("Spam", spamMap.getFileCount());		
+		documentCountMap.put(good, nonSpamMap.getFileCount());
+		documentCountMap.put(spam, spamMap.getFileCount());		
 		biasNonSpam(nonSpamMap);
 		
 		while (start) {
@@ -86,9 +91,49 @@ public class Classifier implements Runnable
 		return new WordMap(pathToCorpus);
 	}
 
+	/**
+	 * Given a category, what is the probability with which 
+	 * a word can appear in it
+	 */
+	public double wordProbability(String word, String category){
+		int catCount = 1;
+		int wordCount = 1;
+		catCount = documentCountMap.get(category);
+		if(category.equals(good)){
+			wordCount = getNonSpamMap().get(word);
+		}
+		else if(category.equals(spam)){
+			wordCount = getSpamMap().get(word);
+		}
+		
+		return Math.min(wordCount/catCount,1);
+		
+	}
+	
+	public double weightedProbability(String word, String category){
+		int weight = 1;
+		double assumedProb = 0.5;
+		double wordProbability= wordProbability(word,category);
+		
+		int totalCount = getSpamMap().get(word)+getNonSpamMap().get(word);
+		
+		double weightedProb = ((totalCount*wordProbability) + (weight*assumedProb))/(weight+totalCount);	
+		return weightedProb;
+		
+	}
+	
+    public WordMap getSpamMap() {
+		return spamMap;
+	}
 
-	private boolean classify(String fileName) {
+    public WordMap getNonSpamMap() {
+		return nonSpamMap;
+	}
+
+	public boolean classify(String fileName) {
 	
 		return false;
 	}
+	
+
 }
