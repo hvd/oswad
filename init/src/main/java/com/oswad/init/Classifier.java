@@ -14,16 +14,20 @@ import com.oswad.init.WordMap;
  */
 public class Classifier implements Runnable
 {
-    private WordMap spamMap;
+    private String spamCorpusPath;
+    private String nonSpamCorpusPath;
+	private WordMap spamMap;
     private WordMap nonSpamMap;
     private Map<String,Integer> documentCountMap = new HashMap<String,Integer>();
     private Map<String,Double> spamProbability;
     
-	Thread classifierThread;
+	private Thread classifierThread;
     boolean start = false;
     boolean isSpam = false;
 	
-    public Classifier(){
+    public Classifier(String spamCorpusPath, String nonSpamCorpusPath){
+    	this.spamCorpusPath = spamCorpusPath;
+    	this.nonSpamCorpusPath = nonSpamCorpusPath;
     	classifierThread = new Thread(this,"ClassifierThread");
     	classifierThread.start();
     	start = true;
@@ -33,8 +37,8 @@ public class Classifier implements Runnable
 	@Override
 	public void run() {
 		String fileName = null;
-		spamMap = train("/home/hkelkar/spam/spam");		
-		nonSpamMap = train("/home/hkelkar/spam/easy_ham");
+		spamMap = train(spamCorpusPath);		
+		nonSpamMap = train(nonSpamCorpusPath);
 
 		documentCountMap.put("Good", nonSpamMap.getFileCount());
 		documentCountMap.put("Spam", spamMap.getFileCount());		
