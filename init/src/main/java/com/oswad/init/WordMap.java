@@ -2,6 +2,7 @@ package com.oswad.init;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
@@ -11,29 +12,40 @@ import java.util.Set;
 
 public class WordMap implements Map<String,Integer>{
 	private Map<String, Integer> wordCountMap = new HashMap<String, Integer>();
+	int fileCount = 0;
 
 	/**
 	 * @param args
 	 */
-	public WordMap(String trainingSetFileName) {
-		// TODO Auto-generated method stub
+	public WordMap(String pathToCorpus) {
+		// Iterate over all the files under that directory and add
+		// the counts to the wordMap
 		try {
-			FileInputStream is = new FileInputStream(trainingSetFileName);
-			DataInputStream in = new DataInputStream(is);
-			BufferedReader br = new BufferedReader(new InputStreamReader(in));
-			String incoming;
-			Integer init = new Integer(0);
+			final File directory = new File(pathToCorpus);
+			fileCount = directory.listFiles().length;
+			for (File f : directory.listFiles()) {
+				FileInputStream is = new FileInputStream(f);
+				DataInputStream in = new DataInputStream(is);
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(in));
+				String incoming;
+				Integer init = new Integer(1);
 
-			while ((incoming = br.readLine()) != null) {
-				String[] buffer = incoming.split("\\s+");
-				for (String s : buffer) {
-					if (!wordCountMap.containsKey(s.toLowerCase())) {
-						wordCountMap.put(s.toLowerCase(), init);
-					} else {
-						wordCountMap.put(s.toLowerCase(), init++);
+				while ((incoming = br.readLine()) != null) {
+					String[] buffer = incoming.split("\\s+");
+					for (String s : buffer) {
+						String lower = s.toLowerCase();
+
+						if (!wordCountMap.containsKey(lower)) {
+							wordCountMap.put(lower, init);
+						} else {
+							Integer i = wordCountMap.get(lower);
+							i++;
+							wordCountMap.put(lower, i);
+						}
 					}
-				}
 
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -109,4 +121,9 @@ public class WordMap implements Map<String,Integer>{
 	public Collection<Integer> values() {
 		return wordCountMap.values();
 	}
+	
+	public int getFileCount() {
+		return fileCount;
+	}
+
 }

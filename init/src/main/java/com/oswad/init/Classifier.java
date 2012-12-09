@@ -2,7 +2,7 @@ package com.oswad.init;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -14,10 +14,10 @@ import com.oswad.init.WordMap;
  */
 public class Classifier implements Runnable
 {
-    WordMap spamMap;
-    WordMap nonSpamMap;
-    Map<String,Integer> documentClassificationMap;
-    Map<String,Double> spamProbability;
+    private WordMap spamMap;
+    private WordMap nonSpamMap;
+    private Map<String,Integer> documentCountMap = new HashMap<String,Integer>();
+    private Map<String,Double> spamProbability;
     
 	Thread classifierThread;
     boolean start = false;
@@ -33,8 +33,11 @@ public class Classifier implements Runnable
 	@Override
 	public void run() {
 		String fileName = null;
-		spamMap = train("spam.txt");
-		nonSpamMap = train("nonspam.txt");
+		spamMap = train("/home/hkelkar/spam/spam");		
+		nonSpamMap = train("/home/hkelkar/spam/easy_ham");
+
+		documentCountMap.put("Good", nonSpamMap.getFileCount());
+		documentCountMap.put("Spam", spamMap.getFileCount());		
 		biasNonSpam(nonSpamMap);
 		
 		while (start) {
@@ -75,8 +78,8 @@ public class Classifier implements Runnable
 	}
 
 
-	private WordMap train(String fileName) {
-		return new WordMap(fileName);
+	private WordMap train(String pathToCorpus) {
+		return new WordMap(pathToCorpus);
 	}
 
 
