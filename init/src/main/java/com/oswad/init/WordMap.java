@@ -17,41 +17,47 @@ public class WordMap implements Map<String,Integer>{
 	/**
 	 * @param args
 	 */
-	public WordMap(String pathToCorpus) {
+	public WordMap(String path, boolean isDirectory) {
 		// Iterate over all the files under that directory and add
 		// the counts to the wordMap
-		try {
-			final File directory = new File(pathToCorpus);
+		if (isDirectory) {
+			final File directory = new File(path);
 			fileCount = directory.listFiles().length;
 			for (File f : directory.listFiles()) {
-				FileInputStream is = new FileInputStream(f);
-				DataInputStream in = new DataInputStream(is);
-				BufferedReader br = new BufferedReader(
-						new InputStreamReader(in));
-				String incoming;
-				Integer init = new Integer(1);
+				populateMap(f);
+			}
+		} else{
+			File file = new File(path);
+			populateMap(file);
+		}
+	}
 
-				while ((incoming = br.readLine()) != null) {
-					String[] buffer = incoming.split("\\s+");
-					for (String s : buffer) {
-						String lower = s.toLowerCase();
-
-						if (!wordCountMap.containsKey(lower)) {
-							wordCountMap.put(lower, init);
-						} else {
-							Integer i = wordCountMap.get(lower);
-							i++;
-							wordCountMap.put(lower, i);
-						}
+	private void populateMap(File f) {
+		try {
+			FileInputStream is = new FileInputStream(f);
+			DataInputStream in = new DataInputStream(is);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String incoming;
+			Integer init = new Integer(1);
+			while ((incoming = br.readLine()) != null) {
+				String[] buffer = incoming.split("\\s+");
+				for (String s : buffer) {
+					String lower = s.toLowerCase();
+					if (!wordCountMap.containsKey(lower)) {
+						wordCountMap.put(lower, init);
+					} else {
+						Integer i = wordCountMap.get(lower);
+						i++;
+						wordCountMap.put(lower, i);
 					}
-
 				}
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public Map<String, Integer> getWordCountMap() {
 		return wordCountMap;
 	}

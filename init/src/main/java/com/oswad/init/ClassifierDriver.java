@@ -19,12 +19,20 @@ public class ClassifierDriver {
 			spamCorpusPath = fileReader.readLine();
 			System.out.print("Enter path to non-spam Corpus: ");
 			nonSpamCorpusPath = fileReader.readLine();
+			Classifier c = new Classifier(spamCorpusPath, nonSpamCorpusPath);
+			System.out.print("Enter Path to Test Corpus: ");
+			String testPath = fileReader.readLine();
+			System.out.println("Probability that this document is good is" +" "+c.bayesProb(testPath+"/test1.txt","Good"));
+			System.out.println("Probability that this document is spam is" +" "+c.bayesProb(testPath+"/test1.txt","Spam"));
+			
+			System.out.println("Probability that this document is good is" +" "+c.bayesProb(testPath+"/test2.txt","Good"));
+			System.out.println("Probability that this document is spam is" +" "+c.bayesProb(testPath+"/test2.txt","Spam"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		Classifier c = new Classifier(spamCorpusPath, nonSpamCorpusPath);
+		
 	}
 
 }

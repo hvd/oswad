@@ -22,7 +22,7 @@ public class Classifier implements Runnable
 
 	private WordMap nonSpamMap;
     private Map<String,Integer> documentCountMap = new HashMap<String,Integer>();
-    private Map<String,Double> spamProbability;
+	private Map<String,Double> spamProbability;
     private final String good = "Good";
     private final String spam = "Spam";
     
@@ -49,7 +49,7 @@ public class Classifier implements Runnable
 		documentCountMap.put(spam, spamMap.getFileCount());		
 		biasNonSpam(nonSpamMap);
 		
-		while (start) {
+	/*	while (start) {
 			System.out.print("Enter Filename of content to test: ");
 			BufferedReader fileReader = new BufferedReader(
 					new InputStreamReader(System.in));
@@ -71,7 +71,7 @@ public class Classifier implements Runnable
 			else{
 				System.out.println("Content is non-spam");
 			}
-		}
+		}*/
 	}
 	
 	
@@ -88,7 +88,7 @@ public class Classifier implements Runnable
 
 
 	private WordMap train(String pathToCorpus) {
-		return new WordMap(pathToCorpus);
+		return new WordMap(pathToCorpus,true);
 	}
 
 	/**
@@ -100,10 +100,14 @@ public class Classifier implements Runnable
 		int wordCount = 1;
 		catCount = documentCountMap.get(category);
 		if(category.equals(good)){
+			if(getNonSpamMap().containsKey(word)){
 			wordCount = getNonSpamMap().get(word);
+			}
 		}
 		else if(category.equals(spam)){
+			if(getSpamMap().containsKey(word)){
 			wordCount = getSpamMap().get(word);
+			}
 		}
 		
 		return Math.min(wordCount/catCount,1);
@@ -115,25 +119,52 @@ public class Classifier implements Runnable
 		double assumedProb = 0.5;
 		double wordProbability= wordProbability(word,category);
 		
-		int totalCount = getSpamMap().get(word)+getNonSpamMap().get(word);
+		int totalCount = (getSpamMap().containsKey(word) ? getSpamMap().get(word) : 0)+(getNonSpamMap().containsKey(word) ? getNonSpamMap().get(word) : 0);
 		
 		double weightedProb = ((totalCount*wordProbability) + (weight*assumedProb))/(weight+totalCount);	
 		return weightedProb;
 		
 	}
 	
-    public WordMap getSpamMap() {
+	public double documentProbability(String pathToDocument, String category){
+		double prob = 1;
+		Map<String,Integer> wordMap = new WordMap(pathToDocument,false);
+		for(String s : wordMap.keySet()){
+			prob = prob*weightedProbability(s,category);
+		}
+		
+		return prob;		
+	}
+	
+    /** Given a document, what is the probability with which it fits in the current category.
+     * @param pathToDocument
+     * @param category
+     * @return
+     */
+    public double bayesProb(String pathToDocument, String category){
+    	int categoryCount = getDocumentCountMap().get(category);
+    	int totalCount = getSpamMap().getFileCount() + getNonSpamMap().getFileCount();
+    	double categoryProb = categoryCount/totalCount;
+    	double docProb = documentProbability(pathToDocument, category);
+    	return docProb*categoryProb;
+    }
+	
+	public WordMap getSpamMap() {
 		return spamMap;
 	}
 
     public WordMap getNonSpamMap() {
 		return nonSpamMap;
 	}
-
+    
+    public Map<String, Integer> getDocumentCountMap() {
+		return documentCountMap;
+	}
+    
 	public boolean classify(String fileName) {
 	
 		return false;
 	}
 	
-
+	
 }
