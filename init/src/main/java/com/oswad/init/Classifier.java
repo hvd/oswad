@@ -96,8 +96,8 @@ public class Classifier implements Runnable
 	 * a word can appear in it
 	 */
 	public double wordProbability(String word, String category){
-		int catCount = 1;
-		int wordCount = 1;
+		double catCount = 1.0;
+		double wordCount = 1.0;
 		catCount = documentCountMap.get(category);
 		if(category.equals(good)){
 			if(getNonSpamMap().containsKey(word)){
@@ -115,11 +115,11 @@ public class Classifier implements Runnable
 	}
 	
 	public double weightedProbability(String word, String category){
-		int weight = 1;
+		double weight = 1.0;
 		double assumedProb = 0.5;
 		double wordProbability= wordProbability(word,category);
 		
-		int totalCount = (getSpamMap().containsKey(word) ? getSpamMap().get(word) : 0)+(getNonSpamMap().containsKey(word) ? getNonSpamMap().get(word) : 0);
+		double totalCount = (getSpamMap().containsKey(word) ? getSpamMap().get(word) : 0)+(getNonSpamMap().containsKey(word) ? getNonSpamMap().get(word) : 0);
 		
 		double weightedProb = ((totalCount*wordProbability) + (weight*assumedProb))/(weight+totalCount);	
 		return weightedProb;
@@ -142,8 +142,8 @@ public class Classifier implements Runnable
      * @return
      */
     public double bayesProb(String pathToDocument, String category){
-    	int categoryCount = getDocumentCountMap().get(category);
-    	int totalCount = getSpamMap().getFileCount() + getNonSpamMap().getFileCount();
+    	double categoryCount = getDocumentCountMap().get(category);
+    	double totalCount = getSpamMap().getFileCount() + getNonSpamMap().getFileCount();
     	double categoryProb = categoryCount/totalCount;
     	double docProb = documentProbability(pathToDocument, category);
     	return docProb*categoryProb;
